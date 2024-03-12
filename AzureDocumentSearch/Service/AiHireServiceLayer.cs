@@ -84,5 +84,20 @@ namespace AiHireService.Service
             }
             return blobs;
         }
+
+        public async Task Delete(string blobName)
+        {
+            BlobClient blobClient = _blobContainerClient.GetBlobClient(blobName);
+            await blobClient.DeleteIfExistsAsync();
+        }
+
+        public async Task DeleteAll()
+        {
+            await foreach (var blob in _blobContainerClient.GetBlobsAsync())
+            {
+                BlobClient blobClient = _blobContainerClient.GetBlobClient(blob.Name);
+                await blobClient.DeleteIfExistsAsync();
+            }
+        }
     }
 }

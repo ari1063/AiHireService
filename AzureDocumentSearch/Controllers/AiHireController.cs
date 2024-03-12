@@ -25,6 +25,8 @@ namespace AzureDocumentSearch.Controllers
             return Ok(_service.SearchService(searchData));
         }
 
+        #region Download
+
         [HttpPost]
         [Route("Download")]
         public  FileResult Download(string blobName)
@@ -65,6 +67,28 @@ namespace AzureDocumentSearch.Controllers
                 return File(ms.ToArray(), "application/zip", "Resumes.zip");
             }
         }
+
+        #endregion
+
+        #region Delete
+
+        [HttpDelete]
+        [Route("Delete")]
+        public IActionResult Delete(string blobName)
+        {
+            return Ok(Task.Run(() => _service.Delete(blobName)));
+        }
+
+        [HttpDelete]
+        [Route("DeleteAll")]
+        public IActionResult DeleteAll()
+        {
+            {
+                return Ok(Task.Run(() => _service.DeleteAll()));
+            }
+        }
+
+        #endregion
 
 
         //private async Task<ActionResult> RunQueryAsync(SearchData model)

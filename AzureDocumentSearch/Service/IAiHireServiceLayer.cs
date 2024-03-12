@@ -8,5 +8,8 @@ namespace AiHireService.Service
         List<SearchResponse> SearchService(string searchData);
         Task<BlobFile> Download(string blobName);
         Task<List<BlobFile>> DownloadAll();
+
+        Task Delete(string blobName);
+        Task DeleteAll();
     }
 }
