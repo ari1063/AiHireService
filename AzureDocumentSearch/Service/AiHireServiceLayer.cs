@@ -6,6 +6,7 @@ using Azure.Storage.Blobs;
 using System.IO.Compression;
 using AiHireService.Model;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Azure.Documents.Client;
 
 namespace AiHireService.Service
 {
@@ -103,6 +104,30 @@ namespace AiHireService.Service
                 await blobClient.DeleteIfExistsAsync();
             }
         }
+
+        public async Task DeleteDocumentsFromCosmosDB(List<int> ids, string databaseId, string collectionId, string _endPointUrl, string _authorizationKey)
+        {
+            using (var client = new DocumentClient(new Uri(_endPointUrl), _authorizationKey))
+            {
+                //Queury to get the link to the stored procedure.
+                var sprocLink = client.CreateStoredProcedureQuery(
+                   UriFactory.CreateDocumentCollectionUri(databaseId, collectionId),
+                   String.Format("select * from root r where r.id = '{0}'", "BulkDelete"))
+                   .ToList().FirstOrDefault();
+
+
+                int[] idSubset = null;
+                //Delete 100 at a time.
+                for (int y = 0; (y * 100) < ids.Count; y++)
+                {
+                    idSubset = ids.Skip(y * 100).Take(100).ToArray();
+                    if (idSubset.Any())
+                    {
+                         await client.ExecuteStoredProcedureAsync<dynamic>(sprocLink._self, idSubset);
+                    }
+                }
+            }
+        }
         #endregion
 
         #region Upload
@@ -112,7 +137,7 @@ namespace AiHireService.Service
             var response = new List<Azure.Response<BlobContentInfo>>();
             foreach (var file in files)
             {
-                string fileName = file.FileName;
+                string fileName = Guid.NewGuid() + file.FileName;
                 using (var memoryStream = new MemoryStream())
                 {
                     file.CopyTo(memoryStream);

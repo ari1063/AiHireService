@@ -2,12 +2,17 @@
 {
     public class SearchResponse
     {
+        public string id { get; set; }
         public string content { get; set; }
+
+        public string type { get; set; }
         public List<string> people { get; set; }
         public List<string> organizations { get; set; }
         public List<string> locations { get; set; }
         public string blobUrl { get; set; }
         public List<Data> data { get; set; }
+
+        public string blobFileName { get; set; }
     }
 
     public class Data
