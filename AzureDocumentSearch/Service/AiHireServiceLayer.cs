@@ -5,6 +5,7 @@ using AzureDocumentSearch.Model.Response;
 using Azure.Storage.Blobs;
 using System.IO.Compression;
 using AiHireService.Model;
+using Azure.Storage.Blobs.Models;
 
 namespace AiHireService.Service
 {
@@ -34,11 +35,10 @@ namespace AiHireService.Service
             index = _configuration["SearchServiceIndex"];
             blobStorageConnectionString = _configuration["StorageConnectionString"];
             blobContainerName = _configuration["StorageContainerName"];
-            _blobContainerClient = new BlobContainerClient(
-       blobStorageConnectionString,
-        blobContainerName);
+            _blobContainerClient = new BlobContainerClient(blobStorageConnectionString, blobContainerName);
         }
 
+        #region Search
         public List<SearchResponse> SearchService(string searchData)
         {
             List<SearchResponse> ret = new List<SearchResponse>();
@@ -54,7 +54,9 @@ namespace AiHireService.Service
 
             return ret;
         }
+        #endregion
 
+        #region Download
         public async Task<BlobFile> Download(string blobName)
         {
             BlobClient blobClient = _blobContainerClient.GetBlobClient(blobName);
@@ -84,7 +86,9 @@ namespace AiHireService.Service
             }
             return blobs;
         }
+        #endregion
 
+        #region Delete
         public async Task Delete(string blobName)
         {
             BlobClient blobClient = _blobContainerClient.GetBlobClient(blobName);
@@ -99,5 +103,27 @@ namespace AiHireService.Service
                 await blobClient.DeleteIfExistsAsync();
             }
         }
+        #endregion
+
+        #region Upload
+        public async Task<List<Azure.Response<BlobContentInfo>>> UploadFiles(List<IFormFile> files)
+        {
+
+            var response = new List<Azure.Response<BlobContentInfo>>();
+            foreach (var file in files)
+            {
+                string fileName = file.FileName;
+                using (var memoryStream = new MemoryStream())
+                {
+                    file.CopyTo(memoryStream);
+                    memoryStream.Position = 0;
+                    var client = await _blobContainerClient.UploadBlobAsync(fileName, memoryStream, default);
+                    response.Add(client);
+                }
+            };
+
+            return response;
+        }
+        #endregion
     }
 }

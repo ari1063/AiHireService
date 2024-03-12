@@ -1,4 +1,5 @@
 ﻿using AiHireService.Model;
+using Azure.Storage.Blobs.Models;
 using AzureDocumentSearch.Model.Response;
 
 namespace AiHireService.Service
@@ -11,5 +12,6 @@ namespace AiHireService.Service
 
         Task Delete(string blobName);
         Task DeleteAll();
+        Task<List<Azure.Response<BlobContentInfo>>> UploadFiles(List<IFormFile> files);
     }
 }

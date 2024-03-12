@@ -18,12 +18,24 @@ namespace AzureDocumentSearch.Controllers
             _service = service;
         }
 
+        #region Upload
+        [HttpPost]
+        [Route("Upload")]
+        public async Task<IActionResult> Upload(List<IFormFile> files)
+        {
+            var response = await _service.UploadFiles(files);
+            return Ok(response);
+        }
+        #endregion
+
+        #region Search
         [HttpGet]
         [Route("Search")]
         public IActionResult Search(string searchData)
         {
             return Ok(_service.SearchService(searchData));
         }
+        #endregion
 
         #region Download
 
